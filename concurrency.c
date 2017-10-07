@@ -6,9 +6,13 @@
 #include <semaphore.h>
 #include <sys/queue.h>
 
+#define MAX_BUFFER_SIZE 32
+
 pthread_t prod_id[2];
 pthread_t con_id[2];
-sem_t mySem;
+sem_t buffer_change_sem;	//semaphore to block when changes are being made to the buffer
+sem_t buffer_full_sem;		//semaphore to block producers when the buffer is full (32)
+sem_t buffer_empty_sem;		//semaphore to block consumers when buffer is empty
 
 struct event
 {
@@ -35,41 +39,52 @@ int queue_size()
 
 void* producer(void *arg)
 {
-	sem_wait(&mySem);
+	struct event *new_event;
 
-	struct event *myEvent = malloc(sizeof(struct event));
-	myEvent->num = genrand_int32() % 8 + 2;
-	myEvent->random_wait = 5;
+	new_event = malloc(sizeof(struct event));
+	new_event->num = genrand_int32() % 8 + 2;
+	new_event->random_wait = 5;
 
-	printf("Producing: %d, %d\n", myEvent->num, myEvent->random_wait);
+	sem_wait(&buffer_full_sem);
+	sem_wait(&buffer_change_sem);
 
-	TAILQ_INSERT_TAIL(&head, myEvent, entries);
+	printf("Producing: %d, %d\n", new_event->num, new_event->random_wait);
+
+	TAILQ_INSERT_TAIL(&head, new_event, entries);
 
 	printf("size: %d\n", queue_size());
 
-	sem_post(&mySem);
+	sem_post(&buffer_empty_sem);
+	sem_post(&buffer_change_sem);
 }
 
 void* consumer(void *arg)
 {
 	struct event *consumed_event;
-	sem_wait(&mySem);
+
+	sem_wait(&buffer_empty_sem);
+	sem_wait(&buffer_change_sem);
+
 
 	consumed_event = head.tqh_first;
 	
 	printf("Consuming: %d, %d\n", consumed_event->num, consumed_event->random_wait);
+
 	TAILQ_REMOVE(&head, consumed_event, entries);
 
 	printf("Size: %d\n", queue_size());
 
-	sem_post(&mySem);
+	sem_post(&buffer_full_sem);
+	sem_post(&buffer_change_sem);
 }
 
 int main()
 {
 	TAILQ_INIT(&head);
 
-	sem_init(&mySem, 0, 1);
+	sem_init(&buffer_change_sem, 0, 1);
+	sem_init(&buffer_full_sem, 0, MAX_BUFFER_SIZE);
+	sem_init(&buffer_empty_sem, 0, 0);
 
 	init_genrand(time(NULL));
 
