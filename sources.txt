@@ -1,0 +1,11 @@
+https://codereview.stackexchange.com/questions/147656/checking-if-cpu-supports-rdrand
+https://stackoverflow.com/questions/11407103/how-i-can-get-the-random-number-from-intels-processor-with-assembler
+
+1. learn about mutex/semaphores
+2. piece by piece, threads -> semaphores -> mersenne twist -> queues -> RDRAND
+3. Lots of small unit tests and print statements. installed gcc on my desktop to test RDRAND
+4. spawning and waiting on threads,
+   how to implement  semaphores,
+   what mersenne twist is,
+   how to implement a queue in C,
+   RDRAND is really hard
