@@ -1,0 +1,511 @@
+\documentclass[10pt,onecolumn]{article}
+\usepackage{graphicx}
+\usepackage{anysize}
+\usepackage{color}
+\usepackage{balance}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{cite}
+\include{pygments.tex}               
+\usepackage{geometry}
+\usepackage{amsmath}
+\marginsize{.75in}{.75in}{.75in}{.75in}
+             
+\begin{document}               
+\begin{titlepage}
+\centering
+{\huge\bfseries Project I: Getting Acquainted\par}
+\vspace{.5cm}
+{\scshape David Skeen and Alex Ruef \par}
+\vspace{.5cm}   
+{\scshape CS 444 Operating Systems II\par}
+\vspace{.5cm} 
+{\Large\itshape Fall 2017\par}
+\par
+\par
+\begin{abstract}
+This project was written for us to get acquainted to the tools that we will
+be using this term. We were introduced to the VM Qemu that will be used
+to teach us about the changes that can be made to the kernel. Furthermore, 
+we wrote a program for the producer consumer problem.
+\end{abstract}
+\end{titlepage}
+
+
+\section{Log of Commands}
+Here are the commands that I used to run the VM along with the occasional comment
+on changes made and how the command effected things.
+\begin{verbatim}
+cd /scratch/fall2017/
+mkdir 16
+cd 16
+git init
+vim run_qemu.sh #This was a script that I wrote so that I would not have to enter
+                  the command every time the I wanted to start the VM
+git add .
+cp /scratch/files/enviroment-setup-i586-poky-linux.csh .
+cp /scratch/files/bzImage-qemux86.bin .
+cp /scratch/files/core-image-lsb-sdk-qemux86.ext4 .
+cp /scratch/files/config-3.19.2-yocto-standard
+git clone git://git.yoctoproject.org/linux-yocto-3.19
+git checkout v3.19.2
+git checkout -b skeenda
+git add .
+git commit
+cp config-3.19.2-yocto-standard linux-yocto-3.19/.config
+cd linux-yocto-3.19
+source ../enviroment-setup-i586-poky-linux.csh
+cp ../run_qemu.sh .
+cp ../core-image-lsb-sdk-qwmux86.csh .
+./run_qemu.sh
+gdb #On another terminal
+target remote: 5516
+continue
+kill 22154
+make -j4 all
+vim run-qemu.sh #Change the location of the kernel to the value location that is generated via make
+./run-qemu.sh
+gdb #On another terminal
+target remote: 5516
+continue
+kill 45752
+git add .
+git commit
+\end{verbatim}
+
+
+\section{Concurrency Solution}
+Our solution for this Producer-Consumer Problem was based around the use of Semaphores and the solution that was provided in the "Little Book of Semaphores". \cite{downey_2008}.
+
+One of the requirements for the solution is that it has to support both RDRAND and the Mersenne Twister for systems that don't support RDRAND.
+To solve this we used both stackexchange\cite{exchange} and stackoverflow \cite{overflow}.
+
+
+\begin{lstlisting}
+_Bool supports_RDRAND()
+{       /*generate bit pattern expect if RDRAND is supported*/
+        const unsigned int flag_RDRAND = (1 << 30);
+
+        /*ecx contains the bit flag that we want*/
+        unsigned int eax, ebx, ecx, edx;
+        /*Grab bit patterns from cpu*/
+        __get_cpuid(1, &eax, &ebx, &ecx, &edx);
+
+        /*check if bit pattern from cpu matches generated pattern*/
+        return ((ecx & flag_RDRAND) == flag_RDRAND);
+}
+\end{lstlisting}
+This was the test using ASM to see if the cpu could handle RDRAND. This function tests if a bit pattern generated via RDRAND was returned correctly. If it doesn't then the program will run with the Mersenne Twister rather than RDRAND
+
+Another requirment was that if a consumer thread arrives while the buffer is empty, it blocks until a producer adds a new item.
+\begin{lstlisting}
+void* consumer(void *arg)
+{
+        struct event *consumed_event;
+
+        while(1){
+                sem_wait(&buffer_empty_sem); /*check if queue is empty*/
+                sem_wait(&buffer_change_sem); /*check if queue is in use*/
+
+                consumed_event = head.tqh_first; /*get element at head of queue*/
+
+                TAILQ_REMOVE(&head, consumed_event, entries);
+
+                /*increment semaphore to reflect additional space in queue*/
+                sem_post(&buffer_full_sem);
+                sem_post(&buffer_change_sem);
+
+                /*consume event*/
+                printf("Consuming for %d seconds\n",
+                        consumed_event->random_wait);
+                sleep(consumed_event->random_wait);
+                printf("Consumed %d after %d seconds\n",
+                        consumed_event->num,
+                        consumed_event->random_wait);
+
+                free(consumed_event);
+        }
+}
+\end{lstlisting}
+This function dose exactly that. It first checks to see if the queu is empty and then if it is in use and if either is true, then it waits until the producer adds a new item. The portion at the bottom with the output is what is being consumed and the wait time.
+
+A further requirement was that, if the buffer is full, it blocks until a consumer removes and item.
+
+\begin{lstlisting}
+void* producer(void *arg)
+{
+        struct event *new_event; /*new event to be produced*/
+        int prod_time; /*time to spend producing*/
+
+        while(1){
+                prod_time = random_gen(3, 7);
+                printf("Producing for %d seconds\n", prod_time);
+                sleep(prod_time);
+
+                /*create and fill event*/
+                new_event = malloc(sizeof(struct event));
+                new_event->num = random_gen(0, 10);
+                new_event->random_wait = random_gen(2, 9);
+
+                sem_wait(&buffer_full_sem); /*check if queue is full*/
+                sem_wait(&buffer_change_sem); /*check if queue is in use*/
+
+                printf("Produced %d after %d seconds\n",
+                        new_event->num,
+                        prod_time);
+
+                TAILQ_INSERT_TAIL(&head, new_event, entries);
+
+                /*increment semaphore to reflect additional event in queue*/
+                sem_post(&buffer_empty_sem);
+                sem_post(&buffer_change_sem);
+        }
+}
+\end{lstlisting}
+This code does that. It generates the new items that are supposed to be put into the queue and then checks to see if the queue is full. If so, it waits until it isnt and then inserts into the buffer.
+
+
+The full code can be found at the end.
+
+
+\section{Qemu Commands}
+
+This is an explanation of the QEMU commands from the qemu man page: \cite{qemu}.
+\begin{verbatim}
+{-gdb tcp::????} Wait for a connection on port ???? to start the VM. In our case is was port 5516
+{-S} Do not start CPU at startup
+{-nographic} Totally disable graphical output so that QEMU is only command line
+{-kernel bzImage-qemux86.bin} Specifies the image(kernel) to boot from
+{-drive file=core-image-lsb-sdk-qemux86.ext3,if=virtio} Define a new drive. Then defines on which type on interface the drive is connected. In our case it is virtio
+{-enable-kvm} Enables the KVM full virtualization support.
+{-net none} Do not create a new NIC
+{-usb} Enable USB driver
+{-localtime} Use the systems local time as the time.
+{--no-reboot} Don't reboot if the kernel crashes
+{--append "root=/dev/vda rw console=ttyS0 debug".} Use the stuff within quotations as the kernel command line.
+
+\end{verbatim}
+
+
+
+
+
+\section{Main Point}
+The main point of the Qemu portion of this assignment was to introduce the students to the Qemu VM and learning how to set it up for future assignments. The concurrency portion was to reintroduce pthreads to the students and then to introduce some of the more famous concurrency problems. In this case, it was for the Producer-Consumer problem in which a producer produces and item and places it in a buffer and then a consumer consumes that item. A major component of this was to help with the use of semiphores and mutexs.
+
+\section{Approach}
+The approach to the assignment was mostly a piece by piece. This means that we essentially went step by step through the writing of the aassignment to research certain aspects as we were writing code. The first place that we started was just getting a refresher on pthreads and then we looked into how best to use semaphores. After that we had to look into the merseene twist to understand how best to use it. We then looked into and developed the Queue and how we would use that. Finally, we looked into RDRAND as it was the last the final thing that we needed to make sure that it worked.
+
+\section{Ensurance of Correction}
+One of the largest ways that we checked the answer was print statements showing our wait time and random number time. We also used small unit tests to check to make sure that values were correct. Finally we downloaded the program onto a laptop to ensure that the RDRAND ran on the laptop.
+
+\begin{verbatim}
+This is the output from one of the runs:
+
+Producing for 3 seconds
+Producing for 3 seconds
+Produced 2 after 3 seconds
+Producing for 7 seconds
+Consuming for 5 seconds
+Produced 0 after 3 seconds
+Producing for 7 seconds
+Consuming for 7 seconds
+Consumed 2 after 5 seconds
+Produced 9 after 7 seconds
+Producing for 7 seconds
+Consuming for 5 seconds
+Produced 10 after 7 seconds
+Producing for 4 seconds
+Consumed 0 after 7 seconds
+Consuming for 6 seconds
+Produced 2 after 4 seconds
+Producing for 7 seconds
+Consumed 9 after 5 seconds
+Consuming for 7 seconds
+Consumed 10 after 6 seconds
+Produced 10 after 7 seconds
+Producing for 6 seconds
+Consuming for 3 seconds
+Consumed 10 after 3 seconds
+Produced 9 after 7 seconds
+Producing for 5 seconds
+Consuming for 2 seconds
+Consumed 2 after 7 seconds
+Produced 9 after 6 seconds
+Producing for 3 seconds
+Consuming for 6 seconds
+Consumed 9 after 2 seconds
+Produced 4 after 3 seconds
+
+\end{verbatim}
+
+\section{What did you Learn?}
+We learned a lot about the spawning and waiting on threads. We learned about how to implement semaphores. We previously had experience using mutexs but we had not had experience using semaphores. We learned about what the mersenne twist was and how to implement it into our program. And we learned that the use of RDRAND can be very difficult.
+
+\section{Work Log}
+\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}
+\textbf{Approximate Start Time} & \textbf{Approximate Duration} & \textbf{Activity} \\
+\hline
+9:15 Wed, Oct 4 & 7 minutes & Made a script for execution \\\hline
+9:22 Wed, Oct 4 & 1 hour & Copied all necessary files and cloned the git directory. Edited the script for correct run. \\\hline
+10:30 Wed, Oct 4 & 15 minutes & Started the VM and figured out how to connect to it \\\hline
+10:45 Wed, Oct 4 & 30 minutes & Searched for the correct file in the bin to run the new VM with stuff generated from make -j4 all. Made the changes in the script and then ran the vm to make sure it would work \\
+10:15 Thu, Oct 5 & 1 hr 45 minutes & Read the little book of Semaphores solution. Began writing with pthreads, semaphores, RDRAND, and the Mersenne Twister \\\hline
+12:15 Fri, Oct 6 & 1 hr & Got the random number generator in the correct range \\\hline
+13:00 Sat, Oct 7 & 2 hr & Began writup in tex \\\hline
+16:00 Sat, Oct 7 & 2 hr & RDRAND and Semaphores working correctly \\\hline
+18:00 Sat, Oct 7 & 15 min & Made sure everything is running correctly \\\hline
+12:00 Sun, Oct 8 & 2 hr & Added most of the writeup, still need Logs and code section \\\hline
+20:00 Sun, Oct 8 & 2 hr & Worked on the log portion and the code portion \\\hline
+\end{tabular}
+\section{Git Log:}
+
+All commits were to https://github.com/skeenda/CS44-OSU/commit\\
+Detail has been reduced to last 7 characters of commit\\
+\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}\textbf{Detail} & \textbf{Author} & \textbf{Description}\\
+\hline
+c7b1a03 & David Skeen & Added a script to run the command given and then copied the enviroment setup to source\\\hline
+8ba3373 & David Skeen &  Cloned the directory and then checked out v3.19.2\\\hline
+df9f3e0 & David Skeen & Copied the config to my directory\\\hline
+f8b73d4 & David Skeen &  Edited the run\_qemu for the correct port and changed back from something that I thought it was supposed to be to the bzImage. Added bzImage to make it run the base.\\\hline
+eb1acb2 & Alexander Ruef & initial concurrency exercise commit\\\hline
+2851d15 & Alexander Ruef & random number generation now in correct range\\\hline
+2e7eda4 & Alex Ruef & Added Queue functionality\\\hline
+9cef3b2 & Alex Ruef & working on queue size limit\\\hline
+5216009 & Alex Ruef & Semaphores correctly in place\\\hline
+8d50405 & Alex Ruef & Added support for RDRAND generation\\\hline
+8805969 & Alex Ruef & final concurrency commit\\\hline
+9b4906e & Alex Ruef & initial commit for sources\\\hline\end{tabular}
+
+
+\begin{lstlisting}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "mt19937ar.c"
+#include <pthread.h>
+//#include <string.h>
+#include <semaphore.h>
+#include <sys/queue.h>
+#include <cpuid.h>
+#include <unistd.h>
+
+#define MAX_BUFFER_SIZE 32
+
+pthread_t prod_id[2];
+pthread_t con_id[2];
+
+sem_t buffer_change_sem; /*semaphore to block when changes are being made to the buffer*/
+sem_t buffer_full_sem;	 /*semaphore to block producers when the buffer is full (32)*/
+sem_t buffer_empty_sem;	 /*semaphore to block consumers when buffer is empty*/
+
+_Bool support_RDRAND;	 /*true = RDRAND is supposed, false = not supported*/
+
+TAILQ_HEAD(head, event) head; /*head address of queue*/
+
+/*--------------------------------------------------------------------
+ *struct for events
+--------------------------------------------------------------------*/
+struct event
+{
+	int num;
+	int random_wait;
+
+	TAILQ_ENTRY(event) entries; /*linked list functionality for event*/
+};
+
+
+/*--------------------------------------------------------------------
+ *Determines if the system supports RDRAND by reading cpu flags
+--------------------------------------------------------------------*/
+_Bool supports_RDRAND()
+{	/*generate bit pattern expect if RDRAND is supported*/
+	const unsigned int flag_RDRAND = (1 << 30); 
+						     
+	/*ecx contains the bit flag that we want*/
+	unsigned int eax, ebx, ecx, edx; 
+	/*Grab bit patterns from cpu*/
+	__get_cpuid(1, &eax, &ebx, &ecx, &edx); 
+
+	/*check if bit pattern from cpu matches generated pattern*/
+	return ((ecx & flag_RDRAND) == flag_RDRAND); 
+}
+
+/*------------------------------------------------------------
+ *initialize random number generators
+ *determines if system supports RDRAND or not
+ *seeds Mersenne Twister if it is being used
+------------------------------------------------------------*/
+int init_random()
+{
+	support_RDRAND = supports_RDRAND();
+
+	if(!support_RDRAND) {
+		init_genrand(time(NULL)); //set seed for Mersenne Twister
+	}
+}
+
+/*------------------------------------------------------------
+ *Generates random number in specified range (inclusive)
+------------------------------------------------------------*/
+int random_gen(int min, int max)
+{
+	unsigned int generated_num;
+	char rc;
+
+	int actual_max = max - min + 1;
+
+	if(!support_RDRAND){
+		generated_num = genrand_int32() % actual_max + min;
+	}
+	else{
+		do{
+			__asm__ volatile(
+				"rdrand %0 ; setc %1"
+				: "=r" (generated_num), "=qm" (rc)
+			);
+		}while(!rc);
+
+		generated_num = generated_num % actual_max + min;
+	}
+
+	return generated_num;
+}
+
+/*-------------------------------------------------
+ *Returns number of items currently in queue
+ *only used for testing
+-------------------------------------------------*/
+int queue_size()
+{
+	struct event *np;
+	int size = 0;
+
+	for(np = head.tqh_first; np != NULL; np = np->entries.tqe_next)
+	{
+		size++;
+	}
+
+	return size;
+}
+
+/*------------------------------------------------
+ *creates new events to place in the queue
+ *blocks if another thread is using the queue
+ *blocks if the queue is full
+-------------------------------------------------*/
+void* producer(void *arg)
+{
+	struct event *new_event; /*new event to be produced*/
+	int prod_time; /*time to spend producing*/
+
+	while(1){
+		prod_time = random_gen(3, 7);
+		printf("Producing for %d seconds\n", prod_time);
+		sleep(prod_time);
+
+		/*create and fill event*/
+		new_event = malloc(sizeof(struct event));
+		new_event->num = random_gen(0, 10);
+		new_event->random_wait = random_gen(2, 9);
+
+		sem_wait(&buffer_full_sem); /*check if queue is full*/
+		sem_wait(&buffer_change_sem); /*check if queue is in use*/
+
+		printf("Produced %d after %d seconds\n",
+			new_event->num,
+			prod_time);
+
+		TAILQ_INSERT_TAIL(&head, new_event, entries);
+
+		/*increment semaphore to reflect additional event in queue*/
+		sem_post(&buffer_empty_sem);
+		sem_post(&buffer_change_sem);
+	}
+}
+
+/*------------------------------------------------
+ *Consumes events from the queue
+ *blocks if another thread is using queue
+ *blocks if queue is empty
+-------------------------------------------------*/
+void* consumer(void *arg)
+{
+	struct event *consumed_event;
+
+	while(1){
+		sem_wait(&buffer_empty_sem); /*check if queue is empty*/
+		sem_wait(&buffer_change_sem); /*check if queue is in use*/
+
+		consumed_event = head.tqh_first; /*get element at head of queue*/
+
+		TAILQ_REMOVE(&head, consumed_event, entries);
+
+		/*increment semaphore to reflect additional space in queue*/
+		sem_post(&buffer_full_sem);
+		sem_post(&buffer_change_sem);
+
+		/*consume event*/
+		printf("Consuming for %d seconds\n",
+			consumed_event->random_wait);
+		sleep(consumed_event->random_wait);
+		printf("Consumed %d after %d seconds\n",
+			consumed_event->num,
+			consumed_event->random_wait);
+
+		free(consumed_event);
+	}
+}
+
+int main()
+{
+	int i;
+
+	init_random(); /*initialize random generation*/
+
+	TAILQ_INIT(&head); /*initialize queue data structure*/
+
+	/*initialize sem to block after 1 wait*/
+	sem_init(&buffer_change_sem, 0, 1); 
+
+	/*initialize sem to MAX_BUFFER_SIZE
+ 	 *indicates that the queue is full
+	 */	 	
+	sem_init(&buffer_full_sem, 0, MAX_BUFFER_SIZE);
+
+	/*initialize sem to 0
+ 	 *indicates that queue is empty
+	 */
+	sem_init(&buffer_empty_sem, 0, 0);
+
+	/*spawn producer threads*/
+	i = 0;
+	while(i < 2){
+		pthread_create(&(prod_id[i]), NULL, &producer, NULL);
+		i++;
+	}
+
+	/*spawn consumer threads*/
+	i = 0;
+	while(i < 2){
+		pthread_create(&(con_id[i]), NULL, &consumer, NULL);
+		i++;
+	}
+
+	/*wait until all threads die*/
+	for(i = 0; i < sizeof(prod_id)/sizeof(prod_id[0]); i++){
+		pthread_join(prod_id[i], NULL);
+	}
+	for(i = 0; i < sizeof(con_id)/sizeof(con_id[0]); i++){
+		pthread_join(con_id[i], NULL);
+	}
+}
+
+
+\end{lstlisting}
+
+\bibliographystyle{ieeetr}
+\bibliography{bib.bib}
+
+
+\end{document}
