@@ -4,13 +4,30 @@
 
 pthread_t philo_id[5];
 
+void* preparePhilo(void *arg){
+	int i;
+
+	for(i=0; i < sizeof(philo_id)/sizeof(philo_id[0]); i++){
+		if(pthread_self() == philo_id[i]){
+			printf("I am philosopher #%d\n", (i+1));
+		}
+	}
+}
+
 void* table(void *arg){
 	printf("I think therefore I am\n");
 }
 
 int main(){
-	pthread_create(&philo_id[0], NULL, &table, NULL);
+	int i;
 
-	pthread_join(philo_id[0], NULL);
+	for(i=0; i < sizeof(philo_id)/sizeof(philo_id[0]); i++){
+		pthread_create(&philo_id[i], NULL, &preparePhilo, NULL);
+	}
+
+	
+	for(i=0; i < sizeof(philo_id)/sizeof(philo_id[0]); i++){
+		pthread_join(philo_id[i], NULL);
+	}
 }
 
