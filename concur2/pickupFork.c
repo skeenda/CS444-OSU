@@ -45,10 +45,20 @@ void get_forks(struct philosopher *philo){
 	printf("%s has picked up forks\n", philo->name);
 }
 
+void eat(struct philosopher *philo){
+	int wait_time;
+
+	wait_time = rand() % 8 + 2;
+
+	printf("%s is eating for %d seconds\n", philo->name, wait_time);
+	sleep(wait_time);
+}
+
 void table(struct philosopher *philo){
 	while(1){
 		think(philo);
 		get_forks(philo);
+		eat(philo);
 	}
 }
 
