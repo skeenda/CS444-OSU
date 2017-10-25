@@ -12,6 +12,10 @@ struct philosopher{
 	sem_t* right_fork;
 };
 
+void table(struct philosopher *philo){
+	printf("I think therefore I am\n- %s\n", philo->name);
+}
+
 void* preparePhilo(void *arg){
 	int i;
 	struct philosopher *philo;
@@ -51,11 +55,7 @@ void* preparePhilo(void *arg){
 		}
 	}
 
-	printf("My name is %s\n", philo->name);
-}
-
-void* table(void *arg){
-	printf("I think therefore I am\n");
+	table(philo);
 }
 
 int main(){
