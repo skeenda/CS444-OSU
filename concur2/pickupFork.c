@@ -5,6 +5,12 @@
 pthread_t philo_id[5];
 sem_t forks[5];
 
+struct philosopher{
+	char* name;
+	sem_t* left_fork;
+	sem_t* right_fork;
+};
+
 void* preparePhilo(void *arg){
 	int i;
 
