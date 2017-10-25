@@ -1,0 +1,5 @@
+Looks like all we have to do is teach noop to sort by sectors
+Maybe insertion sort in the add request function?
+
+I think sector data is in /include/linux/blkdev.h
+request struct has a __sector variable that can be recieved by blk_rq_pos()
