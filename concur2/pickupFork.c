@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdlib.h>
+#include <errno.h>
 
 pthread_t philo_id[5];
 sem_t forks[5];
@@ -21,9 +22,33 @@ void think(struct philosopher *philo){
 	sleep(wait_time);
 }
 
+void get_forks(struct philosopher *philo){
+	int sem_value;
+	int got_forks = 1;
+
+	while(got_forks){
+		sem_getvalue(philo->left_fork, &sem_value);
+		if(sem_value == 1){
+			sem_wait(philo->left_fork);
+
+			sem_getvalue(philo->right_fork, &sem_value);
+			if(sem_value == 1){
+				sem_wait(philo->right_fork);
+				got_forks = 0;
+			}
+			else{
+				sem_post(philo->left_fork);
+			}
+		}
+	}
+
+	printf("%s has picked up forks\n", philo->name);
+}
+
 void table(struct philosopher *philo){
 	while(1){
 		think(philo);
+		get_forks(philo);
 	}
 }
 
@@ -75,7 +100,7 @@ int main(){
 	srand(time(NULL));	/* Init random generator */
 
 	for(i=0; i < sizeof(forks)/sizeof(forks[0]); i++){
-		sem_init(&forks[0], 0, 1);
+		sem_init(&forks[i], 0, 1);
 	}
 
 	for(i=0; i < sizeof(philo_id)/sizeof(philo_id[0]); i++){
