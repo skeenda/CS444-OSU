@@ -3,6 +3,7 @@
 #include <semaphore.h>
 
 pthread_t philo_id[5];
+sem_t forks[5];
 
 void* preparePhilo(void *arg){
 	int i;
@@ -21,10 +22,13 @@ void* table(void *arg){
 int main(){
 	int i;
 
+	for(i=0; i < sizeof(forks)/sizeof(forks[0]); i++){
+		sem_init(&forks[0], 0, 1);
+	}
+
 	for(i=0; i < sizeof(philo_id)/sizeof(philo_id[0]); i++){
 		pthread_create(&philo_id[i], NULL, &preparePhilo, NULL);
 	}
-
 	
 	for(i=0; i < sizeof(philo_id)/sizeof(philo_id[0]); i++){
 		pthread_join(philo_id[i], NULL);
