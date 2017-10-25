@@ -12,8 +12,19 @@ struct philosopher{
 	sem_t* right_fork;
 };
 
+void think(struct philosopher *philo){
+	int wait_time;
+
+	wait_time = rand() % 20 + 1;
+
+	printf("%s is waiting for %d seconds\n", philo->name, wait_time);
+	sleep(wait_time);
+}
+
 void table(struct philosopher *philo){
-	printf("I think therefore I am\n- %s\n", philo->name);
+	while(1){
+		think(philo);
+	}
 }
 
 void* preparePhilo(void *arg){
@@ -60,6 +71,8 @@ void* preparePhilo(void *arg){
 
 int main(){
 	int i;
+
+	srand(time(NULL));	/* Init random generator */
 
 	for(i=0; i < sizeof(forks)/sizeof(forks[0]); i++){
 		sem_init(&forks[0], 0, 1);
