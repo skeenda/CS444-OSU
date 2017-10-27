@@ -1,0 +1,9 @@
+compile with make
+run with eat
+
+run the program with "test" as an arguement i.e. "eat test".
+The test arguement runs a function that generates 100 random numbers in both ranges
+and asserts that they are within the range specified by the assignment.
+It also only prints "important" output, who has what forks.
+I've also included an image showing where the philosophers are sitting aroun the table
+and what forks they are next to.

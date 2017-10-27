@@ -3,9 +3,12 @@
 #include <semaphore.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <assert.h>
 
 pthread_t philo_id[5]; /* holds thread ids for philosophers */
 sem_t forks[5]; /* semaphores representing the forks */
+
+int test; /* Used only for testing */
 
 /* struct to hold philospher details */
 struct philosopher{
@@ -20,7 +23,9 @@ void think(struct philosopher *philo){
 
 	wait_time = rand() % 20 + 1;
 
-	printf("%s is waiting for %d seconds\n", philo->name, wait_time);
+	if(!test){
+		printf("%s is thinking for %d seconds\n", philo->name, wait_time);
+	}
 	sleep(wait_time);
 }
 
@@ -54,8 +59,6 @@ void get_forks(struct philosopher *philo){
 			}
 		}
 	}
-
-	printf("%s has picked up forks %d and %d\n", philo->name, philo->left_fork, philo->right_fork);
 }
 
 /* teaches philosophers to eat by giving them a random amount of time to eat */
@@ -64,7 +67,8 @@ void eat(struct philosopher *philo){
 
 	wait_time = rand() % 8 + 2;
 
-	printf("%s is eating for %d seconds\n", philo->name, wait_time);
+	printf("%s has picked up fork %d and %d and is eating for %d seconds\n",
+		philo->name, philo->right_fork, philo->left_fork, wait_time);
 	sleep(wait_time);
 }
 
@@ -73,7 +77,8 @@ void put_forks(struct philosopher *philo){
 	sem_post(&forks[philo->left_fork]);
 	sem_post(&forks[philo->right_fork]);
 
-	printf("%s put down forks %d and %d\n", philo->name, philo->left_fork, philo->right_fork);
+	printf("%s put down forks %d and %d\n",
+		philo->name, philo->right_fork, philo->left_fork);
 }
 
 /* table the philosophers are sitting around
@@ -137,10 +142,35 @@ void* preparePhilo(void *arg){
 	table(philo);
 }
 
-int main(){
+void rand_test(){
+	int i;
+	int num;
+
+	for(i=0; i<100; i++){
+		num = rand() % 20 + 1;
+		assert(num >= 1 && num <= 20);
+	}
+
+	for(i=0; i<100; i++){
+		num = rand() % 8 + 2;
+		assert(num >= 2 && num <= 9);
+	}
+}
+
+int main(int argc, char **argv[]){
 	int i;
 
+
 	srand(time(NULL));	/* Init random generator */
+
+	/* for testing purposes only*/
+	test = 0;
+	if(argc > 1){
+		if(!strcmp(argv[1], "test")){
+			test = 1;
+			rand_test();
+		}
+	}
 
 	/* initialize semaphore forks */
 	for(i=0; i < sizeof(forks)/sizeof(forks[0]); i++){
