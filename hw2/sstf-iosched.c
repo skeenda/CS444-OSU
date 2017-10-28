@@ -34,16 +34,24 @@ static int clook_dispatch(struct request_queue *q, int force)
 
 static void clook_add_request(struct request_queue *q, struct request *rq)
 {
+	struct clook_data *nd = q->elevator->elevator_data;
 	struct request *curr_rq;
 	sector_t new_sect = blk_rq_pos(rq);
-	struct clook_data *nd = q->elevator->elevator_data;
 
 	/* insertion sort */
-	while(nd != NULL){
-		curr_rq = list_entry(nd, struct request, list);
+	if(list_empty(&nd->queue)){
+		list_add(&rq->queuelist, &nd->queue);
+	}
+	else{
+		curr_rq = list_entry(nd->queue.next, struct request, queuelist);
+		while(new_sect > blk_rq_pos(curr_rq)){
+			curr_rq = list_entry(curr_rq->queuelist.next, struct request, queuelist);
+		}
+
+		curr_rq = list_entry(curr_rq->queuelist.prev, struct request, queuelist);
+		list_add(&rq->queuelist, &prev_req->queuelist);
 	}
 
-	list_add_tail(&rq->queuelist, &nd->queue);
 }
 
 static struct request *
@@ -126,6 +134,6 @@ module_init(clook_init);
 module_exit(clook_exit);
 
 
-MODULE_AUTHOR("Jens Axboe");
+MODULE_AUTHOR("David Skeen, Alex Ruef");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("No-op IO scheduler");
+MODULE_DESCRIPTION("Clook IO scheduler");
