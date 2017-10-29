@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import sys
 
 if __name__ == "__main__":
-	assert(len(sys.argv) > 1), "Filename required as arg."
+	if(len(sys.argv) < 1):
+		print "Need a filename as arg to run"
+		exit()
 	filename = sys.argv[1]
 	points, idx, n = [], [], 0
 	f = open(filename, "r+")
