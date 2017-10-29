@@ -25,6 +25,7 @@ static int clook_dispatch(struct request_queue *q, int force)
 	if (!list_empty(&nd->queue)) {
 		struct request *rq;
 		rq = list_entry(nd->queue.next, struct request, queuelist);
+		trace_printk(KERN_ALERT "%u\n,", rq_end_sector(rq));
 		list_del_init(&rq->queuelist);
 		elv_dispatch_sort(q, rq);
 		return 1;
