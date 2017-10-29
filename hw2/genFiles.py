@@ -9,3 +9,11 @@ def write(i):
 		f.write(x)
 		f.close()
 
+if __name__ == "__main__":
+	fileNames = [test1,test2,test3,test4,test5]
+	for i in fileNames:
+		write(i)
+		f = open(str(i) + ".txt")
+		data = f.read()
+		f.close()
+		print (data + "\n")
