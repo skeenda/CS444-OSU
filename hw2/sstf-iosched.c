@@ -25,7 +25,7 @@ static int clook_dispatch(struct request_queue *q, int force)
 	if (!list_empty(&nd->queue)) {
 		struct request *rq;
 		rq = list_entry(nd->queue.next, struct request, queuelist);
-		trace_printk(KERN_ALERT "%u\n,", rq_end_sector(rq));
+		trace_printk ("[KERNEL DEBUG] Request for sector: %lu\n", blk_rq_pos(rq));
 		list_del_init(&rq->queuelist);
 		elv_dispatch_sort(q, rq);
 		return 1;
@@ -50,7 +50,7 @@ static void clook_add_request(struct request_queue *q, struct request *rq)
 		}
 
 		curr_rq = list_entry(curr_rq->queuelist.prev, struct request, queuelist);
-		list_add(&rq->queuelist, &prev_req->queuelist);
+		list_add(&rq->queuelist, &curr_rq->queuelist);
 	}
 
 }
