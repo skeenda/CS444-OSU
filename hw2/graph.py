@@ -1,6 +1,9 @@
 import numpy
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import sys
+import pylab
 
 if __name__ == "__main__":
 	if(len(sys.argv) < 1):
@@ -9,14 +12,15 @@ if __name__ == "__main__":
 	filename = sys.argv[1]
 	points, idx, n = [], [], 0
 	f = open(filename, "r+")
-	data = f.read()
-	values = data.split("\n")
+	data = f.read().split("\n")
 	plt.figure()
-	for i in values:
+	for i in data[420:460]:
 		n += 1
+		clean = i.split(": ")
+		#print clean[3]
 		idx.append(n)
-		points.append(i)
+		points.append(clean[3])
 	plt.xlabel("Request value")
 	plt.ylabel("Sector value")
-	plt.plt(idx, points, 'r-')
-	plt.show()
+	plt.plot(idx, points, 'r-')
+	plt.savefig("output.png")
