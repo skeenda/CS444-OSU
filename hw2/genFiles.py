@@ -7,7 +7,7 @@ def write(i):
 	for x in range(randint(0, 50)):
 		x = randint(0,500)
 		f.write(str(x))
-	print ( "Wrote to:" + i)
+#	print ( "Wrote to:" + i)
 	f.close()
 
 if __name__ == "__main__":
@@ -18,4 +18,4 @@ if __name__ == "__main__":
 			f = open(str(i) + ".txt")
 			data = f.read()
 			f.close()
-			print ("Read from: " + i + "\n")
+#			print ("Read from: " + i + "\n")
