@@ -1,0 +1,12 @@
+Insertion sort:
+
+List rq_list;
+request new_rq;
+
+request curr_rq = rq_list.head();
+
+while(new_rq.sector > curr_rq.sector){
+	curr_rq = curr_rq.next();
+}
+
+rq_list.addAfter(new_rq, curr_rq.prev);
