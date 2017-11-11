@@ -76,7 +76,11 @@ static void sbd_transfer(struct sbd_device *dev, sector_t sector,
 	}
 	/*Reading*/
 	else
-		memcpy(buffer, dev->data + offset, nbytes);
+		//memcpy(buffer, dev->data + offset, nbytes);
+		for(int i = 0; i < nbytes; i+=crypto_cipher_blocksize(cipher_hack)){
+			printk(KERN_NOTICE "Decrypting DATA");
+			crypto_cipher_decrypt_one( ciph, buffer + i, dev->data + offset + i);
+		}
 }
 
 static void sbd_request(struct request_queue *q) {
@@ -152,6 +156,11 @@ static int __init sbd_init(void) {
 	/*
 	 * And the gendisk structure.
 	 */
+
+	//start Crypto
+	
+	cipher_hack = crypto_alloc_cipher("aes", 0, 0);
+	
 	Device.gd = alloc_disk(16);
 	if (!Device.gd)
 		goto out_unregister;
@@ -180,6 +189,9 @@ static void __exit sbd_exit(void)
 	unregister_blkdev(major_num, "sbd");
 	blk_cleanup_queue(Queue);
 	vfree(Device.data);
+
+	//Clear cipher
+	crypto_free_cipher(cipher_hack);
 }
 
 module_init(sbd_init);
