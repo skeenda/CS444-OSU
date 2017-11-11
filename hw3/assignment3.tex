@@ -1,0 +1,90 @@
+\documentclass[10pt,drafclsnofoot,onecolumn]{article}
+\usepackage{graphicx}
+\usepackage{anysize}
+\usepackage{color}
+\usepackage{balance}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{url}      
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath}
+\marginsize{.75in}{.75in}{.75in}{.75in}
+             
+\begin{document}               
+\begin{titlepage}
+\centering
+{\huge\bfseries Project I: Getting Acquainted\par}
+\vspace{.5cm}
+{\scshape David Skeen and Alex Ruef \par}
+\vspace{.5cm}   
+{\scshape CS 444 Operating Systems II\par}
+\vspace{.5cm} 
+{\Large\itshape Fall 2017\par}
+\par
+\par
+\begin{abstract}
+
+\end{abstract}
+\end{titlepage}
+
+\section{Main Point}
+
+\section{Approach}
+
+\section{Ensurance of Correction}
+
+
+\section{What did you Learn?}
+
+\section{Work Log}
+\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}
+\textbf{Approximate Start Time} & \textbf{Approximate Duration} & \textbf{Activity} \\
+\hline
+9:15 Wed, Oct 4 & 7 minutes & Made a script for execution \\\hline
+9:22 Wed, Oct 4 & 1 hour & Copied all necessary files and cloned the git directory. Edited the script for correct run. \\\hline
+10:30 Wed, Oct 4 & 15 minutes & Started the VM and figured out how to connect to it \\\hline
+10:45 Wed, Oct 4 & 30 minutes & Searched for the correct file in the bin to run the new VM with stuff generated from make -j4 all. Made the changes in the script and then ran the vm to make sure it would work \\
+10:15 Thu, Oct 5 & 1 hr 45 minutes & Read the little book of Semaphores solution. Began writing with pthreads, semaphores, RDRAND, and the Mersenne Twister \\\hline
+12:15 Fri, Oct 6 & 1 hr & Got the random number generator in the correct range \\\hline
+13:00 Sat, Oct 7 & 2 hr & Began writup in tex \\\hline
+16:00 Sat, Oct 7 & 2 hr & RDRAND and Semaphores working correctly \\\hline
+18:00 Sat, Oct 7 & 15 min & Made sure everything is running correctly \\\hline
+12:00 Sun, Oct 8 & 2 hr & Added most of the writeup, still need Logs and code section \\\hline
+20:00 Sun, Oct 8 & 2 hr & Worked on the log portion and the code portion \\\hline
+\end{tabular}
+\\
+\\
+\section{Git Log:}
+
+All commits were to https://github.com/skeenda/CS44-OSU/commit\\
+Detail has been reduced to last 7 characters of commit\\
+\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}\textbf{Detail} & \textbf{Author} & \textbf{Description}\\
+\hline
+c7b1a03 & David Skeen & Added a script to run the command given and then copied the enviroment setup to source\\\hline
+8ba3373 & David Skeen &  Cloned the directory and then checked out v3.19.2\\\hline
+df9f3e0 & David Skeen & Copied the config to my directory\\\hline
+f8b73d4 & David Skeen &  Edited the run\_qemu for the correct port and changed back from something that I thought it was supposed to be to the bzImage. Added bzImage to make it run the base.\\\hline
+eb1acb2 & Alexander Ruef & initial concurrency exercise commit\\\hline
+2851d15 & Alexander Ruef & random number generation now in correct range\\\hline
+2e7eda4 & Alex Ruef & Added Queue functionality\\\hline
+9cef3b2 & Alex Ruef & working on queue size limit\\\hline
+5216009 & Alex Ruef & Semaphores correctly in place\\\hline
+8d50405 & Alex Ruef & Added support for RDRAND generation\\\hline
+8805969 & Alex Ruef & final concurrency commit\\\hline
+9b4906e & Alex Ruef & initial commit for sources\\\hline
+c17fee8 & David Skeen & Added files to enable tex and bib to work\\\hline
+\end{tabular}
+
+\section{Appendix 1: Concurrency Answer}
+\subsection{concurrenc.c}
+\begin{lstlisting}
+
+ \end{lstlisting}
+
+\bibliographystyle{ieeetr}
+\bibliography{bib.bib}
+
+
+\end{document}
