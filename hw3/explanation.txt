@@ -1,3 +1,9 @@
 We will be using sdb.c as our basis file as that is virtuially the same as the one that the book uses
 
 Need to site the book and where the code came from
+
+Found the encrypt one block of plain text here:
+https://elixir.free-electrons.com/linux/latest/source/include/linux/crypto.h#L1517
+
+crypto_cipher_encrypt_one()
+

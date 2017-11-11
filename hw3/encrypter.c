@@ -66,8 +66,15 @@ static void sbd_transfer(struct sbd_device *dev, sector_t sector,
 		printk (KERN_NOTICE "sbd: Beyond-end write (%ld %ld)\n", offset, nbytes);
 		return;
 	}
-	if (write)
-		memcpy(dev->data + offset, buffer, nbytes);
+	if (write){
+		//memcpy(dev->data + offset, buffer, nbytes);
+		for(int i = 0; i < nbytes; i+=crypto_cipher_blocksize(cipher_hack)){
+			printk(KERN_NOTICE "Encrypting DATA");
+			crypto_cipher_encrypt_one( ciph, dev->data + offset + i, buffer + i);
+		}	
+
+	}
+	/*Reading*/
 	else
 		memcpy(buffer, dev->data + offset, nbytes);
 }
