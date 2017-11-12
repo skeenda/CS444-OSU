@@ -1,0 +1,4 @@
+#!/bin/bash
+git log --pretty=format:"%h & %an & %ad & %s" > temp.txt
+python logFormat.py temp.txt
+rm -f temp.txt
