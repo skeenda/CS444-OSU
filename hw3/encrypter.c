@@ -21,7 +21,7 @@
 #include <linux/crypto.h>
 
 MODULE_LICENSE("Dual BSD/GPL");
-static char *Version = "1.4";
+//static char *Version = "1.4";
 
 static int major_num = 0;
 module_param(major_num, int, 0);
@@ -33,6 +33,8 @@ module_param(nsectors, int, 0);
 struct crypto_cipher *cipher_hack;
 static char *key = "HackerMan";
 static int key_len = 8;
+module_param(key, charp, 0644);
+module_param(key_len, int, 0644);
 /*
  * We can tweak our hardware sector size, but the kernel talks to us
  * in terms of small sectors, always.
@@ -99,7 +101,7 @@ static void sbd_request(struct request_queue *q) {
 			continue;
 		}
 		sbd_transfer(&Device, blk_rq_pos(req), blk_rq_cur_sectors(req),
-				req->buffer, rq_data_dir(req));
+				bio_data(req->bio), rq_data_dir(req));
 		if ( ! __blk_end_request_cur(req, 0) ) {
 			req = blk_fetch_request(q);
 		}
