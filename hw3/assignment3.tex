@@ -40,7 +40,7 @@ Cryptography is another important part of I/O devices that we must learn how to 
 
 \section{Approach}
 Our first step was to gather as much information we could about block devices in the Linux kernel.
-We used chapter 16 of Linux Device Drivers as the basis of our device driver.
+We used chapter 16 of Linux Device Drivers as the basis of our device driver\cite{linux_device_drivers}.
 The next step was to understand and learn how to use the built in Linux crypto.
 Then we just had to combine the previous two steps into our own device driver.
 
@@ -107,28 +107,24 @@ Our driver device had to be setup as a module so we had to learn what that was a
 
 All commits were to https://github.com/skeenda/CS44-OSU/commit\\
 Detail has been reduced to last 7 characters of commit\\
-\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}\textbf{Detail} & \textbf{Author} & \textbf{Description}\\
-\hline
-c7b1a03 & David Skeen & Added a script to run the command given and then copied the enviroment setup to source\\\hline
-8ba3373 & David Skeen &  Cloned the directory and then checked out v3.19.2\\\hline
-df9f3e0 & David Skeen & Copied the config to my directory\\\hline
-f8b73d4 & David Skeen &  Edited the run\_qemu for the correct port and changed back from something that I thought it was supposed to be to the bzImage. Added bzImage to make it run the base.\\\hline
-eb1acb2 & Alexander Ruef & initial concurrency exercise commit\\\hline
-2851d15 & Alexander Ruef & random number generation now in correct range\\\hline
-2e7eda4 & Alex Ruef & Added Queue functionality\\\hline
-9cef3b2 & Alex Ruef & working on queue size limit\\\hline
-5216009 & Alex Ruef & Semaphores correctly in place\\\hline
-8d50405 & Alex Ruef & Added support for RDRAND generation\\\hline
-8805969 & Alex Ruef & final concurrency commit\\\hline
-9b4906e & Alex Ruef & initial commit for sources\\\hline
-c17fee8 & David Skeen & Added files to enable tex and bib to work\\\hline
+\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}\textbf{Detail} & \textbf{Author} & \textbf{Date} & \textbf{Description}\\\hline
+0f5f4a2 & David Skeen & Sun Nov 12 01:55:54 2017 -0800 & Adding the workin linux. The patch has been generated. Added steps to test to the tex\\\hline
+ecc8e10 & David Skeen & Sat Nov 11 18:24:28 2017 -0800 & Fixed the last error to allow the code to compile\\\hline
+326319a & Alex Ruef & Sat Nov 11 17:10:52 2017 -0800 & wrote abstract\\\hline
+1bd7e66 & David Skeen & Sat Nov 11 17:03:22 2017 -0800 & Fixed more errors\\\hline
+84ce5ea & David Skeen & Sat Nov 11 16:59:40 2017 -0800 & Fixed some issues with encrypter.c\\\hline
+e66c893 & Alex Ruef & Sat Nov 11 16:57:20 2017 -0800 & finished what we learn\\\hline
+ab5b231 & Alex Ruef & Sat Nov 11 16:24:36 2017 -0800 & finished approach\\\hline
+6ea5f53 & Alex Ruef & Sat Nov 11 16:07:23 2017 -0800 & added bib file\\\hline
+557bd4a & David Skeen & Sat Nov 11 15:49:26 2017 -0800 & Added the decrypter and init and free for cipher\\\hline
+7ff83e5 & Alex Ruef & Sat Nov 11 15:07:10 2017 -0800 & started writing on our approach\\\hline
+0e7c5a1 & Alex Ruef & Sat Nov 11 14:56:38 2017 -0800 & wrote main point\\\hline
+ba5bf90 & Alex Ruef & Sat Nov 11 14:37:12 2017 -0800 & initial commit for writeup\\\hline
+8fd041e & David Skeen & Fri Nov 10 22:40:40 2017 -0800 & Added the encyrpt block section to the encrypter.c. Added the where I found the block encrypter info in explanation.txt. Took about an hour and half to do both.\\\hline
+bea8fb8 & David Skeen & Thu Nov 9 18:24:13 2017 -0800 & Added the Linux crypto header, the key, the key len and the cypher. Need to research where to start the cypher.\\\hline
+3e34787 & David Skeen & Thu Nov 9 18:06:27 2017 -0800 & Added a folder for HW3\\\hline
+406f33b & David Skeen & Thu Nov 9 18:05:38 2017 -0800 & Added the basic file for the device driver. Need to add encryption to it\\\hline
 \end{tabular}
-
-\section{Appendix 1: Concurrency Answer}
-\subsection{concurrenc.c}
-\begin{lstlisting}
-
- \end{lstlisting}
 
 \bibliographystyle{ieeetr}
 \bibliography{bib.bib}
