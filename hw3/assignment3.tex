@@ -15,9 +15,9 @@
 \begin{document}               
 \begin{titlepage}
 \centering
-{\huge\bfseries Project I: Getting Acquainted\par}
+{\huge\bfseries Project III: Getting Acquainted\par}
 \vspace{.5cm}
-{\scshape David Skeen and Alex Ruef \par}
+{\scshape Alex Ruef and David Skeen \par}
 \vspace{.5cm}   
 {\scshape CS 444 Operating Systems II\par}
 \vspace{.5cm} 
@@ -26,6 +26,9 @@
 \par
 \begin{abstract}
 In this project we are instructed with creating our own RAM disk device driver.
+We must also use Linux's crypto API to encrypt and decrypt our block device.
+The device driver must be written as a module that can be moved into a running VM.
+In doing so we will learn more about I/O devices and how they interact with the Linux kernel.
 
 \end{abstract}
 \end{titlepage}
@@ -46,6 +49,7 @@ Then we just had to combine the previous two steps into our own device driver.
 
 \section{What did you Learn?}
 We learned about I/O devices and how to implement them in the Linux kernel.
+While writting the I/O device we learned a lot about how they work and about design decisions that can be made.
 Using crypto.h we learned how to encrypt and decrypt blocks of data.
 In the process of using crypto.h we also learned how to read and understand code with poor documentation.
 Our driver device had to be setup as a module so we had to learn what that was and how to use it in the Linux kernel.
