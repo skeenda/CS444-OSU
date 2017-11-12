@@ -30,7 +30,7 @@ module_param(logical_block_size, int, 0);
 static int nsectors = 1024; /* How big the drive is */
 module_param(nsectors, int, 0);
 
-struct crypto_cipher *cipher_hack
+struct crypto_cipher *cipher_hack;
 static char *key = "HackerMan";
 static int key_len = 8;
 /*
@@ -62,24 +62,26 @@ static void sbd_transfer(struct sbd_device *dev, sector_t sector,
 	unsigned long offset = sector * logical_block_size;
 	unsigned long nbytes = nsect * logical_block_size;
 
+	int i = 0;
+	
 	if ((offset + nbytes) > dev->size) {
 		printk (KERN_NOTICE "sbd: Beyond-end write (%ld %ld)\n", offset, nbytes);
 		return;
 	}
 	if (write){
 		//memcpy(dev->data + offset, buffer, nbytes);
-		for(int i = 0; i < nbytes; i+=crypto_cipher_blocksize(cipher_hack)){
+		for(i = 0; i < nbytes; i+=crypto_cipher_blocksize(cipher_hack)){
 			printk(KERN_NOTICE "Encrypting DATA");
-			crypto_cipher_encrypt_one( ciph, dev->data + offset + i, buffer + i);
+			crypto_cipher_encrypt_one( cipher_hack, dev->data + offset + i, buffer + i);
 		}	
 
 	}
 	/*Reading*/
 	else
 		//memcpy(buffer, dev->data + offset, nbytes);
-		for(int i = 0; i < nbytes; i+=crypto_cipher_blocksize(cipher_hack)){
+		for(i = 0; i < nbytes; i+=crypto_cipher_blocksize(cipher_hack)){
 			printk(KERN_NOTICE "Decrypting DATA");
-			crypto_cipher_decrypt_one( ciph, buffer + i, dev->data + offset + i);
+			crypto_cipher_decrypt_one( cipher_hack, buffer + i, dev->data + offset + i);
 		}
 }
 
@@ -194,5 +196,5 @@ static void __exit sbd_exit(void)
 	crypto_free_cipher(cipher_hack);
 }
 
-module_init(sbd_init);
-module_exit(sbd_exit);
+module_init(encrypter_init);
+module_exit(encrypter_exit);
