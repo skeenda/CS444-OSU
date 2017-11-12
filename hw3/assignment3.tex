@@ -15,7 +15,7 @@
 \begin{document}               
 \begin{titlepage}
 \centering
-{\huge\bfseries Project III: Getting Acquainted\par}
+{\huge\bfseries Project III: The Kernel Crypto API\par}
 \vspace{.5cm}
 {\scshape Alex Ruef and David Skeen \par}
 \vspace{.5cm}   
@@ -85,29 +85,11 @@ Using crypto.h we learned how to encrypt and decrypt blocks of data.
 In the process of using crypto.h we also learned how to read and understand code with poor documentation.
 Our driver device had to be setup as a module so we had to learn what that was and how to use it in the Linux kernel.
 
-\section{Work Log}
-\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}
-\textbf{Approximate Start Time} & \textbf{Approximate Duration} & \textbf{Activity} \\
-\hline
-9:15 Wed, Oct 4 & 7 minutes & Made a script for execution \\\hline
-9:22 Wed, Oct 4 & 1 hour & Copied all necessary files and cloned the git directory. Edited the script for correct run. \\\hline
-10:30 Wed, Oct 4 & 15 minutes & Started the VM and figured out how to connect to it \\\hline
-10:45 Wed, Oct 4 & 30 minutes & Searched for the correct file in the bin to run the new VM with stuff generated from make -j4 all. Made the changes in the script and then ran the vm to make sure it would work \\
-10:15 Thu, Oct 5 & 1 hr 45 minutes & Read the little book of Semaphores solution. Began writing with pthreads, semaphores, RDRAND, and the Mersenne Twister \\\hline
-12:15 Fri, Oct 6 & 1 hr & Got the random number generator in the correct range \\\hline
-13:00 Sat, Oct 7 & 2 hr & Began writup in tex \\\hline
-16:00 Sat, Oct 7 & 2 hr & RDRAND and Semaphores working correctly \\\hline
-18:00 Sat, Oct 7 & 15 min & Made sure everything is running correctly \\\hline
-12:00 Sun, Oct 8 & 2 hr & Added most of the writeup, still need Logs and code section \\\hline
-20:00 Sun, Oct 8 & 2 hr & Worked on the log portion and the code portion \\\hline
-\end{tabular}
-\\
-\\
 \section{Git Log:}
-
 All commits were to https://github.com/skeenda/CS44-OSU/commit\\
-Detail has been reduced to last 7 characters of commit\\
-\begin{tabular}{|p{5cm}|p{5cm}|p{5cm}}\textbf{Detail} & \textbf{Author} & \textbf{Date} & \textbf{Description}\\\hline
+\\
+\begin{tabular}{|p{1.5cm}|p{2cm}|p{5cm}|p{7cm}|}
+\textbf{Detail} & \textbf{Author} & \textbf{Date} & \textbf{Description}\\\hline
 0f5f4a2 & David Skeen & Sun Nov 12 01:55:54 2017 -0800 & Adding the workin linux. The patch has been generated. Added steps to test to the tex\\\hline
 ecc8e10 & David Skeen & Sat Nov 11 18:24:28 2017 -0800 & Fixed the last error to allow the code to compile\\\hline
 326319a & Alex Ruef & Sat Nov 11 17:10:52 2017 -0800 & wrote abstract\\\hline
