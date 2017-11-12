@@ -196,5 +196,5 @@ static void __exit sbd_exit(void)
 	crypto_free_cipher(cipher_hack);
 }
 
-module_init(encrypter_init);
-module_exit(encrypter_exit);
+module_init(sbd_init);
+module_exit(sbd_exit);
