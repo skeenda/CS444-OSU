@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 pthread_t searchers[1];
 //pthread_t inserters[1];
