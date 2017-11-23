@@ -17,6 +17,10 @@ void* insert(void *arg){
 	printf("I am a inserter.\n");
 }
 
+void* delete(void *arg){
+	printf("I am a deleter.\n");
+}
+
 int main(){
 	int i;
 
@@ -34,6 +38,11 @@ int main(){
 		pthread_create(&inserters[i], NULL, &insert, NULL);
 	}
 
+	/* spawn deleter threads */
+	for(i=0; i < sizeof(deleters)/sizeof(deleters[0]); i++){
+		pthread_create(&deleters[i], NULL, &delete, NULL);
+	}
+
 	/* wait for searcher threads to finish (never) */
 	for(i=0; i < sizeof(searchers)/sizeof(searchers[0]); i++){
 		pthread_join(searchers[i], NULL);
@@ -42,5 +51,10 @@ int main(){
 	/* wait for inserter threads to finish (never) */
 	for(i=0; i < sizeof(inserters)/sizeof(inserters[0]); i++){
 		pthread_join(inserters[i], NULL);
+	}
+
+	/* wait for deleter threads to finish (never) */
+	for(i=0; i < sizeof(deleters)/sizeof(deleters[0]); i++){
+		pthread_join(deleters[i], NULL);
 	}
 }
