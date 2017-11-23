@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-pthread_t searchers[1];
+pthread_t searchers[2];
 pthread_t inserters[1];
 pthread_t deleters[1];
 
@@ -28,10 +28,17 @@ void* search(void *arg){
 			sem_wait(&reading);
 		}
 
+		printf("Searching\n");
+		sleep(3);
+		printf("done searching\n");
+
 		if(curr_searchers == 1){
 			sem_post(&reading);
 		}
 		curr_searchers--;
+
+
+		sleep(4);
 	}
 }
 
@@ -47,9 +54,15 @@ void* delete(void *arg){
 		sem_wait(&inserting);
 		sem_wait(&deleting);
 
+		printf("deleting\n");
+		sleep(3);
+		printf("done deleting\n");
+
 		sem_post(&deleting);
 		sem_post(&inserting);
 		sem_post(&reading);
+
+		sleep(1);
 	}
 }
 
