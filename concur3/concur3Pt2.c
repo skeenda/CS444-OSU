@@ -16,10 +16,16 @@ void* search(void *arg){
 int main(){
 	int i;
 
+	/* initialize semaphores */
+	sem_init(&inserting, 0, 1);
+	sem_init(&deleting, 0, 1);
+
+	/* spawn searcher threads */
 	for(i=0; i < sizeof(searchers)/sizeof(searchers[0]); i++){
 		pthread_create(&searchers[i], NULL, &search, NULL);
 	}
 
+	/* wait for searcher threads to finish (never) */
 	for(i=0; i < sizeof(searchers)/sizeof(searchers[0]); i++){
 		pthread_join(searchers[i], NULL);
 	}
