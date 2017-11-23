@@ -41,6 +41,16 @@ void* insert(void *arg){
 
 void* delete(void *arg){
 	printf("I am a deleter.\n");
+
+	while(1){
+		sem_wait(&reading);
+		sem_wait(&inserting);
+		sem_wait(&deleting);
+
+		sem_post(&deleting);
+		sem_post(&inserting);
+		sem_post(&reading);
+	}
 }
 
 int main(){
