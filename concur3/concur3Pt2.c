@@ -6,11 +6,33 @@ pthread_t searchers[1];
 pthread_t inserters[1];
 pthread_t deleters[1];
 
+sem_t reading;
 sem_t inserting;
 sem_t deleting;
 
+int curr_searchers = 0;
 void* search(void *arg){
+	int deleting_val;
+
 	printf("I am a searcher.\n");
+
+	while(1){
+		sem_getvalue(&deleting, &deleting_val);
+		if(deleting_val <= 0){
+			sem_wait(&deleting);
+			sem_post(&deleting);
+		}
+
+		curr_searchers++;
+		if(curr_searchers == 1){
+			sem_wait(&reading);
+		}
+
+		if(curr_searchers == 1){
+			sem_post(&reading);
+		}
+		curr_searchers--;
+	}
 }
 
 void* insert(void *arg){
@@ -25,6 +47,7 @@ int main(){
 	int i;
 
 	/* initialize semaphores */
+	sem_init(&reading, 0, 1);
 	sem_init(&inserting, 0, 1);
 	sem_init(&deleting, 0, 1);
 
