@@ -43,12 +43,22 @@ void* search(void *arg){
 }
 
 void* insert(void *arg){
-	printf("I am a inserter.\n");
+	while(1){
+		sem_wait(&inserting);
+		sem_wait(&deleting);
+
+		printf("inserting\n");
+		sleep(3);
+		printf("done inserting\n");
+
+		sem_post(&deleting);
+		sem_post(&inserting);
+
+		sleep(1);
+	}
 }
 
 void* delete(void *arg){
-	printf("I am a deleter.\n");
-
 	while(1){
 		sem_wait(&reading);
 		sem_wait(&inserting);
