@@ -3,8 +3,8 @@
 #include <semaphore.h>
 
 pthread_t searchers[2];
-pthread_t inserters[1];
-pthread_t deleters[1];
+pthread_t inserters[2];
+pthread_t deleters[2];
 
 sem_t reading;
 sem_t inserting;
@@ -13,8 +13,6 @@ sem_t deleting;
 int curr_searchers = 0;
 void* search(void *arg){
 	int deleting_val;
-
-	printf("I am a searcher.\n");
 
 	while(1){
 		sem_getvalue(&deleting, &deleting_val);
@@ -45,13 +43,11 @@ void* search(void *arg){
 void* insert(void *arg){
 	while(1){
 		sem_wait(&inserting);
-		sem_wait(&deleting);
 
 		printf("inserting\n");
 		sleep(3);
 		printf("done inserting\n");
 
-		sem_post(&deleting);
 		sem_post(&inserting);
 
 		sleep(1);
