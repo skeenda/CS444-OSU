@@ -13,6 +13,10 @@ void* search(void *arg){
 	printf("I am a searcher.\n");
 }
 
+void* insert(void *arg){
+	printf("I am a inserter.\n");
+}
+
 int main(){
 	int i;
 
@@ -25,8 +29,18 @@ int main(){
 		pthread_create(&searchers[i], NULL, &search, NULL);
 	}
 
+	/* spawn searcher threads */
+	for(i=0; i < sizeof(inserters)/sizeof(inserters[0]); i++){
+		pthread_create(&inserters[i], NULL, &insert, NULL);
+	}
+
 	/* wait for searcher threads to finish (never) */
 	for(i=0; i < sizeof(searchers)/sizeof(searchers[0]); i++){
 		pthread_join(searchers[i], NULL);
+	}
+	
+	/* wait for inserter threads to finish (never) */
+	for(i=0; i < sizeof(inserters)/sizeof(inserters[0]); i++){
+		pthread_join(inserters[i], NULL);
 	}
 }
