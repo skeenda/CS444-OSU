@@ -10,25 +10,44 @@ sem_t reading;
 sem_t inserting;
 sem_t deleting;
 
+int active_searchers = 0;
+int active_inserters = 0;
+int active_deleters = 0;
+
 int curr_searchers = 0;
+
+/* prints current # of active searchers, inserters, and deleters */
+void print_status(){
+	printf("%d\t\t%d\t\t%d\n",
+		active_searchers, active_inserters, active_deleters);
+}
+
+/* any # of readers can read at a time
+ * cannot run when a deleter is running */
 void* search(void *arg){
 	int deleting_val;
 
 	while(1){
+		/* if deleter is running searchers must wait for it to finish 
+ 		 * immdetiently post to allow other searchers through  */
 		sem_getvalue(&deleting, &deleting_val);
 		if(deleting_val <= 0){
 			sem_wait(&deleting);
 			sem_post(&deleting);
 		}
 
+		/* only the first searcher should wait on the semaphore
+ 		 * this is used to block the deleters */
 		curr_searchers++;
 		if(curr_searchers == 1){
 			sem_wait(&reading);
 		}
 
-		printf("Searching\n");
+		active_searchers++;
+		print_status();
 		sleep(3);
-		printf("done searching\n");
+		active_searchers--;
+		print_status();
 
 		if(curr_searchers == 1){
 			sem_post(&reading);
@@ -40,13 +59,18 @@ void* search(void *arg){
 	}
 }
 
+/* only 1 inserter can run at a time
+ * no deleters
+ * any # of readers */
 void* insert(void *arg){
 	while(1){
 		sem_wait(&inserting);
 
-		printf("inserting\n");
+		active_inserters++;
+		print_status();
 		sleep(3);
-		printf("done inserting\n");
+		active_inserters--;
+		print_status();
 
 		sem_post(&inserting);
 
@@ -54,15 +78,18 @@ void* insert(void *arg){
 	}
 }
 
+/* only 1 deleter and nothing else can run at a time */
 void* delete(void *arg){
 	while(1){
 		sem_wait(&reading);
 		sem_wait(&inserting);
 		sem_wait(&deleting);
 
-		printf("deleting\n");
+		active_deleters++;
+		print_status();
 		sleep(3);
-		printf("done deleting\n");
+		active_deleters--;
+		print_status();
 
 		sem_post(&deleting);
 		sem_post(&inserting);
@@ -74,6 +101,8 @@ void* delete(void *arg){
 
 int main(){
 	int i;
+
+	printf("searchers\tinserters\tdeleters\n");
 
 	/* initialize semaphores */
 	sem_init(&reading, 0, 1);
