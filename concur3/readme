@@ -1,0 +1,6 @@
+use "make" to compile
+run problem 2 with "part2"
+
+To test problem 2:
+You can read the output to verify the concurrency constraints are never violated.
+There are also asserts in the print_status function that enforce the contraints.

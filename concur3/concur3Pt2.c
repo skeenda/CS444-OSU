@@ -1,15 +1,20 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <assert.h>
 
+/* threads */
 pthread_t searchers[2];
 pthread_t inserters[2];
 pthread_t deleters[2];
 
+/* semaphores */
 sem_t reading;
 sem_t inserting;
 sem_t deleting;
 
+/* stores # of active threads in each catagory
+ * used in print_status() */
 int active_searchers = 0;
 int active_inserters = 0;
 int active_deleters = 0;
@@ -20,6 +25,18 @@ int curr_searchers = 0;
 void print_status(){
 	printf("%d\t\t%d\t\t%d\n",
 		active_searchers, active_inserters, active_deleters);
+
+	if(active_deleters > 0){
+		assert(active_inserters == 0);
+		assert(active_searchers == 0);
+	}
+	
+	if(active_inserters > 0){
+		assert(active_deleters == 0);
+	}
+
+	assert(1 >= active_deleters);
+	assert(1 >= active_inserters);
 }
 
 /* any # of readers can read at a time
