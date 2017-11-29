@@ -1,0 +1,5 @@
+slob is first fit, need to change it to best fit.
+
+slob location: linux-yocto-3.19/mm/slob.c
+
+I think the function we want is either slob_alloc or slob_page_alloc
