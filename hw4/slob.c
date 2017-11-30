@@ -219,6 +219,7 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 	slob_t *prev, *cur, *aligned = NULL, *best, *next_best, *prev_best;
 	int delta = 0, units = SLOB_UNITS(size), best_delta = SLOB_UNITS(size);
 
+	/* search list for best fit */
 	for (prev = NULL, cur = sp->freelist; ; prev = cur, cur = slob_next(cur)) {
 		slobidx_t avail = slob_units(cur);
 
@@ -227,41 +228,48 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 			delta = aligned - cur;
 		}
 
-		/* find best fit here */
+		/* if there is enough space available
+ 		 * and the space is smaller than the previous */
+		if(avail >= (units + delta) && (avail - units - delta < best_delta)){
+			best = cur;
+			prev_best = prev;
+			best_delta = avail - units - delta;
+		}
 
-		if (slob_last(cur))
+				/* break early if perfect fit is found */
+		if (slob_last(cur) || best_delta == 0)
 			break;
 	}
 
-	if (delta) { /* need to fragment head to align? */
-		next = slob_next(cur);
-		set_slob(aligned, avail - delta, next);
-		set_slob(cur, delta, aligned);
-		prev = cur;
-		cur = aligned;
-		avail = slob_units(cur);
-	}
+	if(best != NULL){
+		if (delta) { /* need to fragment head to align? */
+			next_best = slob_next(best);
+			set_slob(aligned, avail - delta, next_best);
+			set_slob(best, delta, aligned);
+			prev_best = cur;
+			best = aligned;
+			avail = slob_units(best);
+		}
 
-	next = slob_next(cur);
-	if (avail == units) { /* exact fit? unlink. */
-		if (prev)
-			set_slob(prev, slob_units(prev), next);
-		else
-			sp->freelist = next;
-	} else { /* fragment */
-		if (prev)
-			set_slob(prev, slob_units(prev), cur + units);
-		else
-			sp->freelist = cur + units;
-		set_slob(cur + units, avail - units, next);
-	}
+		next_best = slob_next(best);
+		if (avail == units) { /* exact fit? unlink. */
+			if (prev_best)
+				set_slob(prev_best, slob_units(prev_best), next_best);
+			else
+				sp->freelist = next_best;
+		} else { /* fragment */
+			if (prev_best)
+				set_slob(prev_best, slob_units(prev_best), best + units);
+			else
+				sp->freelist = best + units;
+			set_slob(best + units, avail - units, next_best);
+		}
 
-	sp->units -= units;
-	if (!sp->units)
-		clear_slob_page_free(sp);
-	return cur;
-		
-	
+		sp->units -= units;
+		if (!sp->units)
+			clear_slob_page_free(sp);
+		return best;
+	}
 }
 
 /*
