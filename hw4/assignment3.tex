@@ -1,0 +1,84 @@
+\documentclass[10pt,drafclsnofoot,onecolumn]{article}
+\usepackage{graphicx}
+\usepackage{anysize}
+\usepackage{color}
+\usepackage{balance}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{url}      
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath}
+\marginsize{.75in}{.75in}{.75in}{.75in}
+             
+\begin{document}               
+\begin{titlepage}
+\centering
+{\huge\bfseries Project III: The Kernel Crypto API\par}
+\vspace{.5cm}
+{\scshape Alex Ruef and David Skeen \par}
+\vspace{.5cm}   
+{\scshape CS 444 Operating Systems II\par}
+\vspace{.5cm} 
+{\Large\itshape Fall 2017\par}
+\par
+\par
+\begin{abstract}
+
+\end{abstract}
+\end{titlepage}
+
+\section{Main Point}
+
+\section{Approach}
+
+\section{Ensurance of Correction}
+To ensure correction of code, follow these steps:
+
+\begin{itemize}
+\item Clone the code to a fresh repo: git clone git://git.yoctoproject.org/linux-yocto-3.19
+\item Checkout the correct version: git checkout v3.19.2
+\item Apply the patch file : git apply assign3.patch
+\item Source the correct enviroment: source /scratch/files/environment-setup-i586-poky-linux.csh
+\item Copy the core file into the linux folder: cp /scratch/files/core-image-lsb-sdk-qemux86.ext4 .
+\item Copy the config file into the linux folder: cp /scratch/files/config-3.19.2-yocto-standard .config
+\item Go into the menuconfig and set sbd to a Module:
+	\begin{itemize}
+	\item make menuconfig
+	\item Go to device drivers
+	\item Enter block drivers
+	\item Go to SBD block driver
+	\item Press M
+	\item Save and exit
+	\end{itemize}
+\item Make the VM: make -j4 all
+\item Start the vm: qemu-system-i386 -nographic -kernel arch/x86/boot/bzImage -drive file=core-image-lsb-sdk-qemux86.ext4 -enable-kvm -usb -localtime --no-reboot --append "root=/dev/hda rw console=ttyS0 debug"
+\item Use the root account with no password
+\item Go to the base directory: cd ../../
+\item Copy the module into the base directory using scp from the drivers/block/ directory: EXAMPLE: scp skeenda@os2.engr.oregonstate.edu:/scratch/fall2017/16/linux-yocto-3.19/drivers/block/sbd.ko .
+\item Start up the module: insmod sbd.ko
+\item Create the ext2 file directory: mkfs.ext2 /dev/sbd0
+\item Create a directory to mount to: mkdir /mnt
+\item Mount it: mount /dev/sbd0 /mnt
+\item Enter some text into a random file on the mounted dir: echo "Testing 123 Can you find me" > /mnt/test
+\item Try to find that text on the device: grep -a "Testing" /dev/sbd0
+\item If nothing is returned for the previous step, then there has been a succesful encryption. If there was no encryption that occured, then you would be able to find the text via grepping. You can try any other things that are put into the file but as long as they do not show up in the grep, we have encryption.
+
+\end{itemize}
+
+\section{What did you Learn?}
+
+\section{Git Log:}
+All commits were to https://github.com/skeenda/CS44-OSU/commit\\
+\\
+\begin{tabular}{|p{1.5cm}|p{2cm}|p{5cm}|p{7cm}|}
+\textbf{Detail} & \textbf{Author} & \textbf{Date} & \textbf{Description}\\\hline
+
+\end{tabular}
+
+\bibliographystyle{ieeetr}
+\bibliography{bib.bib}
+
+
+\end{document}
