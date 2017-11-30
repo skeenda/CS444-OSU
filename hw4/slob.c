@@ -73,6 +73,8 @@
 #include <linux/atomic.h>
 
 #include "slab.h"
+unsigned long freed_memory = 0;
+unsigned long used_memory = 0;
 /*
  * slob_block has a field 'units', which indicates size of block if +ve,
  * or offset of next block if -ve (in SLOB_UNITs).
@@ -310,14 +312,24 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		b = slob_page_alloc(sp, size, align);
 		if (!b)
 			continue;
-
+		
+		freed_memory = 0;
+		list_for_each_entry(sp, &free_slob_small, list) {
+			freed_memory += sp->units;
+		}
+		list_for_each_entry(sp, &free_slob_medium, list) {
+			freed_memory += sp->units;
+		}
+		list_for_each_entry(sp, &free_slob_large, list) {
+			freed_memory += sp->units;
+		}
 		/* Improve fragment distribution and reduce our average
 		 * search time by starting our next search here. (see
 		 * Knuth vol 1, sec 2.5, pg 449) */
-		if (prev != slob_list->prev &&
-				slob_list->next != prev->next)
-			list_move_tail(slob_list, prev->next);
-		break;
+		//if (prev != slob_list->prev &&
+		//		slob_list->next != prev->next)
+		//	list_move_tail(slob_list, prev->next);
+		//break;
 	}
 	spin_unlock_irqrestore(&slob_lock, flags);
 
@@ -338,6 +350,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		b = slob_page_alloc(sp, size, align);
 		BUG_ON(!b);
 		spin_unlock_irqrestore(&slob_lock, flags);
+		used_memory++;
 	}
 	if (unlikely((gfp & __GFP_ZERO) && b))
 		memset(b, 0, size);
@@ -372,6 +385,7 @@ static void slob_free(void *block, int size)
 		__ClearPageSlab(sp);
 		page_mapcount_reset(sp);
 		slob_free_pages(b, 0);
+		used_memory--;
 		return;
 	}
 
@@ -649,4 +663,11 @@ void __init kmem_cache_init(void)
 void __init kmem_cache_init_late(void)
 {
 	slab_state = FULL;
+}
+
+asmlinkage long sys_mem_free(void){
+	return freed_memory;
+}
+asmlinkage long sys_mem_used(void){
+	return SLOB_UNITS(Page_SIZE) * used_memory;
 }
