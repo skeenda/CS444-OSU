@@ -71,6 +71,8 @@
 #include <trace/events/kmem.h>
 
 #include <linux/atomic.h>
+#include <linux/syscalls.h>
+#include <linux/linkage.h>
 
 #include "slab.h"
 unsigned long freed_memory = 0;
@@ -232,7 +234,8 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 
 		/* if there is enough space available
  		 * and the space is smaller than the previous */
-		if(avail >= (units + delta) && (avail - (units + delta) < best_delta)){
+		if(avail >= (units + delta) &&
+		   (best == NULL || avail - (units + delta) < best_delta)){
 			best = cur;
 			prev_best = prev;
 			best_delta = avail - units - delta;
@@ -256,7 +259,8 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 		next_best = slob_next(best);
 		if (avail == units) { /* exact fit? unlink. */
 			if (prev_best)
-				set_slob(prev_best, slob_units(prev_best), next_best);
+				set_slob(prev_best, slob_units(prev_best),
+				next_best);
 			else
 				sp->freelist = next_best;
 		} else { /* fragment */
@@ -272,6 +276,7 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 			clear_slob_page_free(sp);
 		return best;
 	}
+	return NULL
 }
 
 /*
