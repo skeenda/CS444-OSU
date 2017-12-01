@@ -56,6 +56,7 @@
  * in order to prevent random node placement.
  */
 
+#include <linux/syscalls.h>
 #include <linux/kernel.h>
 #include <linux/slab.h>
 
@@ -71,11 +72,10 @@
 #include <trace/events/kmem.h>
 
 #include <linux/atomic.h>
-#include <linux/syscalls.h>
-#include <linux/linkage.h>
+#include <linkage.h>
 
 #include "slab.h"
-unsigned long freed_memory = 0;
+unsigned long free_memory = 0;
 unsigned long used_memory = 0;
 /*
  * slob_block has a field 'units', which indicates size of block if +ve,
@@ -318,16 +318,6 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		if (!b)
 			continue;
 		
-		freed_memory = 0;
-		list_for_each_entry(sp, &free_slob_small, list) {
-			freed_memory += sp->units;
-		}
-		list_for_each_entry(sp, &free_slob_medium, list) {
-			freed_memory += sp->units;
-		}
-		list_for_each_entry(sp, &free_slob_large, list) {
-			freed_memory += sp->units;
-		}
 		/* Improve fragment distribution and reduce our average
 		 * search time by starting our next search here. (see
 		 * Knuth vol 1, sec 2.5, pg 449) */
@@ -335,6 +325,16 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		//		slob_list->next != prev->next)
 		//	list_move_tail(slob_list, prev->next);
 		//break;
+	}
+	free_memory = 0;
+	list_for_each_entry(sp, &free_slob_small, list) {
+		free_memory += sp->units;
+	}
+	list_for_each_entry(sp, &free_slob_medium, list) {
+		free_memory += sp->units;
+	}
+	list_for_each_entry(sp, &free_slob_large, list) {
+		free_memory += sp->units;
 	}
 	spin_unlock_irqrestore(&slob_lock, flags);
 
@@ -670,9 +670,16 @@ void __init kmem_cache_init_late(void)
 	slab_state = FULL;
 }
 
-asmlinkage long sys_mem_free(void){
-	return freed_memory;
+SYSCALL_DEFINE0(slob_free){
+	return 1;
 }
-asmlinkage long sys_mem_used(void){
-	return SLOB_UNITS(Page_SIZE) * used_memory;
+SYSCALL_DEFINE0(slob_used){
+	return 1;
 }
+/*
+asmlinkage long sys_slob_free(void){
+	return 1;
+}
+asmlinkage long sys_slob_used(void){
+	return 1;
+}*/
