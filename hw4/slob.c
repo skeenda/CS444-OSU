@@ -248,6 +248,11 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 	}
 
 	if(best != NULL){
+		/* reset variables to match best fit selection */
+		avail = slob_units(best);
+		aligned = (slob_t *)ALIGN((unsigned long)best, align);
+		delta = aligned - best;
+
 		if (delta) { /* need to fragment head to align? */
 			next_best = slob_next(best);
 			set_slob(aligned, avail - delta, next_best);
