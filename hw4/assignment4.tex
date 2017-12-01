@@ -29,6 +29,14 @@
 \end{abstract}
 \end{titlepage}
 
+\section{Initial Design}
+The file we need to modify resides in: linux-yocto-3.19/mm/slob.c
+Page allocation happens in slob\_page\_alloc()
+We need to modify it so that it finds the smallest hole that will fit the block.
+Currently it finds the first hole that will fit the block and stops there.
+Need to modify it so that it continues after finding a hole that fits and saves the hole the whole it found.
+After it has looked at every open space we can then allocate the page.
+
 \section{Main Point}
 The purpose of this project is to examine how Linux does memory management and how slob is implemented.
 We need to understand the current implementation of slob before we can modify it to a best fit solution.
