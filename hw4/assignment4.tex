@@ -35,6 +35,10 @@ We need to understand the current implementation of slob before we can modify it
 Then by testing our code we learn how to monitor memory usage in Linux and how our code stacks up to the Linux implementation.
 
 \section{Approach}
+The first step was to find the existing slob file and where it lives in Linux.
+Then we had to read through slob and try to understand how it does what it does and what we need to change.
+Once we had a solid understanding of what slob did we identified the section we needed to change and looked at it closely.
+We saw that we had to modify it so that it would keep searching after it found a space that fit and look for a better fitted space.
 
 \section{Ensurance of Correction}
 To ensure correction of code, follow these steps:
@@ -71,6 +75,9 @@ To ensure correction of code, follow these steps:
 \end{itemize}
 
 \section{What did you Learn?}
+We learned that page allocation in linux is not all that complicated, at least compared to other things we have done this term.
+We learned how to monitor Linux memory usage and how to compare it with other algorithms.
+We learned what pages and blocks look like in the Linux kernel and more on the inner workings of the kernel.
 
 \section{Git Log:}
 All commits were to https://github.com/skeenda/CS44-OSU/commit\\
