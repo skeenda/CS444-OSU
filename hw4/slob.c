@@ -220,7 +220,7 @@ static void slob_free_pages(void *b, int order)
  */
 static void *slob_page_alloc(struct page *sp, size_t size, int align)
 {
-	slob_t *prev, *cur, *aligned = NULL, *best = NULL, *next_best, *prev_best = NULL;
+	slob_t *prev, *cur, *aligned = NULL, *best = NULL, *next_best = NULL, *prev_best = NULL;
 	int delta = 0, units = SLOB_UNITS(size), best_delta = SLOB_UNITS(size);
 	slobidx_t avail;
 
@@ -235,15 +235,15 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 
 		/* if there is enough space available
  		 * and the space is smaller than the previous */
-		if(avail >= (units + delta) &&
-		   (best == NULL || avail - (units + delta) < best_delta)){
+		if((avail >= (units + delta)) &&
+		   (best == NULL || ((avail - (units + delta)) < best_delta))){
 			best = cur;
 			prev_best = prev;
 			best_delta = avail - (units + delta);
 		}
 
 		/* break early if perfect fit is found */
-		if (slob_last(cur) || best_delta == 0)
+		if (slob_last(cur))
 			break;
 	}
 
