@@ -72,7 +72,7 @@
 #include <trace/events/kmem.h>
 
 #include <linux/atomic.h>
-#include <linkage.h>
+//#include <linux/linkage.h>
 
 #include "slab.h"
 unsigned long free_memory = 0;
@@ -222,10 +222,11 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 {
 	slob_t *prev, *cur, *aligned = NULL, *best, *next_best, *prev_best;
 	int delta = 0, units = SLOB_UNITS(size), best_delta = SLOB_UNITS(size);
+	slobidx_t avail;
 
 	/* search list for best fit */
 	for (prev = NULL, cur = sp->freelist; ; prev = cur, cur = slob_next(cur)) {
-		slobidx_t avail = slob_units(cur);
+		avail = slob_units(cur);
 
 		if (align) {
 			aligned = (slob_t *)ALIGN((unsigned long)cur, align);
@@ -276,7 +277,7 @@ static void *slob_page_alloc(struct page *sp, size_t size, int align)
 			clear_slob_page_free(sp);
 		return best;
 	}
-	return NULL
+	return NULL;
 }
 
 /*
@@ -326,7 +327,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		//	list_move_tail(slob_list, prev->next);
 		//break;
 	}
-	free_memory = 0;
+/*	free_memory = 0;
 	list_for_each_entry(sp, &free_slob_small, list) {
 		free_memory += sp->units;
 	}
@@ -337,7 +338,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		free_memory += sp->units;
 	}
 	spin_unlock_irqrestore(&slob_lock, flags);
-
+*/
 	/* Not enough space: must allocate a new page */
 	if (!b) {
 		b = slob_new_pages(gfp & ~__GFP_ZERO, 0, node);
